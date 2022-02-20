@@ -7,38 +7,76 @@
 #include <sys/socket.h>
 #include <arpa/inet.h>
 #include <pthread.h>
+#include <sys/uio.h>
 
+#include "plugin.h"
 #include "modbus.h"
 #include "modbusd.h"
 
-void *modbus(int *s)
+int readn(int s, void *data, size_t len)
 {
+	int rc;
+
+	while (len > 0)
+	{
+		rc = read(s, data, len);
+		if (rc < 0)
+		{
+			ERROR("%m: read rc=%d", rc);
+			pthread_exit(NULL);
+		}
+		len -= rc;
+		data += rc;
+	}
+}
+int write_error(int s, struct modbus_tcp *tcp_hdr, int function, int error)
+{
+	struct modbus_err err;
+	struct iovec io[2];
+	int rc;
+
+	err.error_code = ERROR_CODE(function);
+	err.exception_code = error;
+	tcp_hdr->len = htons(3);
+	io[0].iov_base = tcp_hdr;
+	io[0].iov_len = sizeof(struct modbus_tcp);
+	io[1].iov_base = &err;
+	io[1].iov_len = sizeof(err);
+	rc = writev(s, io, 2);
+	if (rc < 0)
+	{
+		ERROR("%m: writev rc=%d", rc);
+		pthread_exit(NULL);
+	}
+}
+
+
+void *modbus(void *v)
+{
+	int s = *(int*)v;
 	int rc;
 	struct modbus_tcp tcp_hdr;
 	struct modbus_req req;
+	struct modbus_err err;
 	int len;
+	struct plugin *plugin;
 
-	VERBOSE("new thread %d\n", *s);
+	VERBOSE("new thread %d\n", s);
 	for (;;)
 	{
-		rc = read(*s, &tcp_hdr, sizeof(tcp_hdr));
-		if (rc < 7)
-		{
-			ERROR("%m: read1 rc=%d", rc);
-			pthread_exit(NULL);
-		}
+		readn(s, &tcp_hdr, sizeof(tcp_hdr));
 		len = ntohs(tcp_hdr.len);
 		VERBOSE("tx=%d proto=%d len=%d unit=%d\n", 
 			tcp_hdr.transaction_id,
 			tcp_hdr.protocol_id,
 			len, 
 			tcp_hdr.unit_id);
-		rc = read(*s, &req, len-1);
-		if (rc < len-1)
+		readn(s, &req, len-1);
+		plugin = plugins[tcp_hdr.unit_id]; 
+		if (plugin == NULL)
 		{
-			ERROR("%m: read2 rc=%d", rc);
-			pthread_exit(NULL);
+			write_error(s, &tcp_hdr, req.function, GATEWAY_PATH_UNAVAILABLE);
+			continue;
 		}
- 
 	}
 }

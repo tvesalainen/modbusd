@@ -4,6 +4,8 @@
 
 #include <linux/types.h>
 
+#define ERROR_CODE(func) (func|0x80)
+
 struct modbus_tcp
 {
 	__u16 transaction_id;
@@ -21,6 +23,12 @@ struct modbus_req
 	__u16 data[123];
 }__attribute__((packed));
 
-void *modbus(int *);
+struct modbus_err
+{
+	__u8 error_code;
+	__u8 exception_code;
+}__attribute__((packed));
+
+void *modbus(void *);
 
 #endif /* MODBUSTCP_H */

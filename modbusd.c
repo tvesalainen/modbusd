@@ -13,17 +13,50 @@
 #include <sys/ioctl.h>
 #include <arpa/inet.h>
 #include <pthread.h>
+#include <dlfcn.h>
 
 #include "modbus.h"
 #include "modbusd.h"
 
 int verbose = 0;
+int use_stderr = 1;
+
+struct plugin *plugins[256];
+
+int add_plugin(const char* arg)
+{
+	int unit;
+	char *lib;
+	void *plib;
+	__u16 data;
+
+	unit = atoi(arg);
+	lib = index(arg, ':');
+	if (lib == NULL)
+	{
+		fprintf(stderr, "illegal unit %s\n", arg);
+		exit(-1);
+	}
+	lib++;
+	VERBOSE("add unit %d lib %s\n", unit, lib);
+	plib = dlopen(lib, RTLD_LAZY);
+	if (plib == NULL)
+	{
+		fprintf(stderr, "%s not found\n", lib );
+		exit(-1);
+	}
+
+	struct plugin *plugin = (struct plugin*)calloc(1, sizeof(plugin));
+	plugins[unit] = plugin;
+	plugin->read_holding_registers = dlsym(plib, "read_holding_registers");
+	plugin->read_holding_registers(123, 1, &data);
+	fprintf(stderr, "%d data\n", data );
+}
 
 int main(int argc, char **argv)
 {
 	int c;
 	int port = MODBUS_PORT;
-	int use_stderr = 1;
         int true = 1;
         int false = 0;
 	int s;
@@ -33,7 +66,7 @@ int main(int argc, char **argv)
 	int size;
 	pthread_t thread;
 
-        while ((c = getopt (argc, argv, "vp:s")) != -1)
+        while ((c = getopt (argc, argv, "vp:sl:")) != -1)
         {
                 switch (c)
                 {
@@ -46,12 +79,16 @@ int main(int argc, char **argv)
                         case 'p':
                                 port = atoi(optarg);
                         break;
+                        case 'l':
+                                add_plugin(optarg);
+                        break;
                         case 'h':
                         default:
                                 fprintf(stderr, "usage:\n"
 						"\t-v\t\tverbose\n"
 						"\t-s\t\tlog only to syslog\n"
 						"\t-p <port>\tport\n"
+						"\t-l <unit>:<lib>\tadd plugin\n"
 						"\t-h\t\thelp\n"
 				);
                                 exit(-1);

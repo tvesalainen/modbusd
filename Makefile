@@ -1,3 +1,7 @@
 
 modbusd: modbusd.o modbus.o
-	gcc -pthread modbusd.o modbus.o -o modbusd
+	gcc -ldl -pthread modbusd.o modbus.o -o modbusd
+
+plugin.so:	plugin.o
+	ld -shared -o plugin.so plugin.o -lc
+

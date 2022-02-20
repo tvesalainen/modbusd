@@ -11,4 +11,11 @@ extern int verbose;
 #define VERBOSE(...) if (verbose) fprintf(stderr, __VA_ARGS__)
 #define ERROR(...)  syslog(LOG_USER|LOG_ERR, __VA_ARGS__)
 
+struct plugin
+{
+	int (*read_holding_registers)(__u16, __u16, __u16*);
+};
+
+extern struct plugin *plugins[256];
+
 #endif /* _MODBUSD_H */
