@@ -18,7 +18,14 @@ struct modbus_req
 {
 	__u8  function;
 	__u16 address;
-	__u16 registers;
+	__u16 quantity;
+	__u8  bytes;
+	__u16 data[123];
+}__attribute__((packed));
+
+struct modbus_rsp
+{
+	__u8  function;
 	__u8  bytes;
 	__u16 data[123];
 }__attribute__((packed));
