@@ -68,26 +68,6 @@ int write_error(int s, struct modbus_tcp *tcp_hdr, int function, int error)
 	}
 }
 
-int to_net(__u16 *to, __u16 *from, int count)
-{
-	int ii;
-
-	for (ii=0;ii<count;ii++)
-	{
-		to[ii] = htons(from[ii]);
-	}
-}
-
-int from_net(__u16 *to, __u16 *from, int count)
-{
-	int ii;
-
-	for (ii=0;ii<count;ii++)
-	{
-		to[ii] = ntohs(from[ii]);
-	}
-}
-
 void *modbus(void *v)
 {
 	int s = *(int*)v;
@@ -98,7 +78,7 @@ void *modbus(void *v)
 	struct modbus_err err;
 	int len;
 	struct plugin *plugin;
-	__u16 array[125];
+	struct modbus_arg arg;
 	unsigned int address;
 	unsigned int quantity;
 
@@ -131,12 +111,12 @@ void *modbus(void *v)
 						write_error(s, &tcp_hdr, req.function, ILLEGAL_DATA_VALUE );
 						break;
 					}
-					rc = plugin->read_holding_registers(address, quantity, array);
+					rc = plugin->read_holding_registers(address, quantity, &arg);
 					if (rc == 0)
 					{
 						rsp.function = req.function;
 						rsp.bytes = 2*quantity;
-						to_net(rsp.data, array, quantity);
+						memcpy(&(rsp.data), &arg, 2*quantity);
 						write_response(s, &tcp_hdr, &rsp, 2*quantity+2);
 					}
 					else

@@ -4,6 +4,8 @@
 
 #include <linux/types.h>
 
+#include "plugin.h"
+
 #define ERROR_CODE(func) (func|0x80)
 
 struct modbus_tcp
@@ -20,14 +22,14 @@ struct modbus_req
 	__u16 address;
 	__u16 quantity;
 	__u8  bytes;
-	__u16 data[123];
+	struct modbus_arg data;
 }__attribute__((packed));
 
 struct modbus_rsp
 {
 	__u8  function;
 	__u8  bytes;
-	__u16 data[123];
+	struct modbus_arg data;
 }__attribute__((packed));
 
 struct modbus_err
