@@ -20,6 +20,7 @@ int readn(int s, void *data, size_t len)
 	while (len > 0)
 	{
 		rc = read(s, data, len);
+fprintf(stderr, "rc=%d\n", rc);
 		if (rc < 0)
 		{
 			ERROR("%m: read rc=%d", rc);
@@ -29,7 +30,7 @@ int readn(int s, void *data, size_t len)
 		data += rc;
 	}
 }
-int write_response(int s, struct modbus_tcp *tcp_hdr, struct modbus_rsp *rsp, size_t rsp_size)
+int write_response(int s, struct modbus_tcp *tcp_hdr, void *rsp, size_t rsp_size)
 {
 	struct iovec io[2];
 	int rc;
@@ -118,6 +119,38 @@ void *modbus(void *v)
 						rsp.bytes = 2*quantity;
 						memcpy(&(rsp.data), &arg, 2*quantity);
 						write_response(s, &tcp_hdr, &rsp, 2*quantity+2);
+					}
+					else
+					{
+						if (rc > 0)
+						{
+							write_error(s, &tcp_hdr, req.function, rc );
+						}
+						else
+						{
+							write_error(s, &tcp_hdr, req.function, SLAVE_DEVICE_FAILURE );
+						}
+					}
+				}
+				else
+				{
+					write_error(s, &tcp_hdr, req.function, ILLEGAL_FUNCTION );
+				}
+				break;
+			case 16:	/* Write Multiple Registers */
+				if (plugin->write_multiple_registers != NULL)
+				{
+					address = ntohs(req.address);
+					quantity = ntohs(req.quantity);
+					if (quantity > 125)
+					{
+						write_error(s, &tcp_hdr, req.function, ILLEGAL_DATA_VALUE );
+						break;
+					}
+					rc = plugin->write_multiple_registers(address, quantity, &arg);
+					if (rc == 0)
+					{
+						write_response(s, &tcp_hdr, &req, 5);
 					}
 					else
 					{

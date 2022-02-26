@@ -27,8 +27,9 @@ int add_plugin(const char* arg)
 {
 	int unit;
 	char *lib;
+	char *larg;
 	void *plib;
-	__u16 data;
+	int (*init)(const char *arg);
 
 	unit = atoi(arg);
 	lib = index(arg, ':');
@@ -38,7 +39,17 @@ int add_plugin(const char* arg)
 		exit(-1);
 	}
 	lib++;
-	VERBOSE("add unit %d lib %s\n", unit, lib);
+	larg = index(lib, ':');
+	if (larg != NULL)
+	{
+		*larg = 0;
+		larg++;
+		VERBOSE("add unit %d lib %s %s\n", unit, lib, larg);
+	}
+	else
+	{
+		VERBOSE("add unit %d lib %s\n", unit, lib);
+	}
 	plib = dlopen(lib, RTLD_LAZY);
 	if (plib == NULL)
 	{
@@ -49,8 +60,12 @@ int add_plugin(const char* arg)
 	struct plugin *plugin = (struct plugin*)calloc(1, sizeof(plugin));
 	plugins[unit] = plugin;
 	plugin->read_holding_registers = dlsym(plib, "read_holding_registers");
-	plugin->read_holding_registers(123, 1, &data);
-	fprintf(stderr, "%d data\n", data );
+	plugin->write_multiple_registers = dlsym(plib, "write_multiple_registers");
+	init = dlsym(plib, "init");
+	if (init != NULL)
+	{
+		init(larg);
+	}
 }
 
 int main(int argc, char **argv)

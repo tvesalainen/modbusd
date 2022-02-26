@@ -14,6 +14,7 @@ extern int verbose;
 struct plugin
 {
 	int (*read_holding_registers)(__u16, __u16, struct modbus_arg*);
+	int (*write_multiple_registers)(__u16, __u16, struct modbus_arg*);
 };
 
 extern struct plugin *plugins[256];

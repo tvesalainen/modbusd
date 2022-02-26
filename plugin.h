@@ -25,6 +25,8 @@ struct modbus_arg
 	};
 }__attribute__((packed));
 
+int init(const char* arg);
 int read_holding_registers(__u16 address, __u16 quantity, struct modbus_arg *data);
+int write_multiple_registers(__u16 address, __u16 quantity, struct modbus_arg *data);
  
 #endif /* _PLUGIN_H */
