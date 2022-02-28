@@ -89,8 +89,8 @@ void *modbus(void *v)
 		readn(s, &tcp_hdr, sizeof(tcp_hdr));
 		len = ntohs(tcp_hdr.len);
 		VERBOSE("tx=%d proto=%d len=%d unit=%d\n", 
-			tcp_hdr.transaction_id,
-			tcp_hdr.protocol_id,
+			ntohs(tcp_hdr.transaction_id),
+			ntohs(tcp_hdr.protocol_id),
 			len, 
 			tcp_hdr.unit_id);
 		readn(s, &req, len-1);
@@ -147,7 +147,7 @@ void *modbus(void *v)
 						write_error(s, &tcp_hdr, req.function, ILLEGAL_DATA_VALUE );
 						break;
 					}
-					rc = plugin->write_multiple_registers(address, quantity, &arg);
+					rc = plugin->write_multiple_registers(address, quantity, &req.data);
 					if (rc == 0)
 					{
 						write_response(s, &tcp_hdr, &req, 5);

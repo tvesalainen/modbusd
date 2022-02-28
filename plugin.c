@@ -13,7 +13,7 @@ int init(const char* arg)
 {
 	fprintf(stderr, "init arg %s\n", arg);
 	size = atoi(arg);
-	memory = calloc(1, size);
+	memory = calloc(size, sizeof(__u16));
 	if (memory == NULL)
 	{
 		perror(arg);
@@ -32,7 +32,7 @@ int read_holding_registers(__u16 address, __u16 quantity, struct modbus_arg *dat
 	}
 	for (ii=0;ii<quantity;ii++)
 	{
-		data->array_short[ii] = htons(memory[ii]);
+		data->array_short[ii] = htons(memory[address+ii]);
 	}
 	return OK;
 }
@@ -47,7 +47,7 @@ int write_multiple_registers(__u16 address, __u16 quantity, struct modbus_arg *d
 	}
 	for (ii=0;ii<quantity;ii++)
 	{
-		memory[ii] = ntohs(data->array_short[ii]);
+		memory[address+ii] = ntohs(data->array_short[ii]);
 	}
 	return OK;
 }
