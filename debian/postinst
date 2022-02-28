@@ -1,0 +1,6 @@
+#! /bin/sh
+#
+update-rc.d modbusd defaults
+service modbusd restart
+
+

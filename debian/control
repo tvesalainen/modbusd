@@ -1,0 +1,11 @@
+Source: modbusd  
+Maintainer: Timo Vesalainen <timo.vesalainen@iki.fi>
+Build-Depends: debhelper (>= 8.0.0)
+Standards-Version: 4.3.0
+Section: utils
+
+Package: modbusd  
+Priority: extra  
+Architecture: any
+Depends: ${shlibs:Depends}, ${misc:Depends}  
+Description: Modbus Tcp server
