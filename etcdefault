@@ -1,5 +1,3 @@
-DAEMON=/usr/bin/can2udp
-CAN_BUS=can1
-MULTICAST_ADDR=224.0.0.3
-MULTICAST_PORT=11111
-DAEMON_ARGS="-s -b $CAN_BUS -a $MULTICAST_ADDR -p $MULTICAST_PORT"
+DAEMON=/usr/bin/modbusd
+GPIO="0:/usr/lib/gpio.so:/dev/gpiochip0"
+DAEMON_ARGS="-s -l $GPIO"

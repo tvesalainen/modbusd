@@ -6,4 +6,5 @@ override_dh_auto_install:
 	install -D -m 0755 etcdefault $$(pwd)/debian/modbusd/etc/default/modbusd
 	install -D -m 0755 etcinitd $$(pwd)/debian/modbusd/etc/init.d/modbusd
 	install -D -m 0755 modbusd $$(pwd)/debian/modbusd/usr/bin/modbusd
+	install -D -m 0755 gpio.so $$(pwd)/debian/modbusd/usr/lib/gpio.so
 

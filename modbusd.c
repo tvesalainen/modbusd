@@ -117,11 +117,11 @@ int main(int argc, char **argv)
                         case 'h':
                         default:
                                 fprintf(stderr, "usage:\n"
-						"\t-v\t\tverbose\n"
-						"\t-s\t\tlog only to syslog\n"
-						"\t-p <port>\tport\n"
-						"\t-l <unit>:<lib>\tadd plugin\n"
-						"\t-h\t\thelp\n"
+						"\t-v\t\t\tverbose\n"
+						"\t-s\t\t\tlog only to syslog\n"
+						"\t-p <port>\t\tport\n"
+						"\t-l <unit>:<lib>:<arg>\tadd plugin\n"
+						"\t-h\t\t\thelp\n"
 				);
                                 exit(-1);
                 }
