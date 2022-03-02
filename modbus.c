@@ -21,6 +21,8 @@
 #include <string.h>
 #include <errno.h>
 #include <sys/socket.h>
+#include <netinet/in.h>
+#include <netinet/tcp.h>
 #include <arpa/inet.h>
 #include <pthread.h>
 #include <sys/uio.h>
@@ -36,7 +38,6 @@ int readn(int s, void *data, size_t len)
 	while (len > 0)
 	{
 		rc = read(s, data, len);
-fprintf(stderr, "rc=%d\n", rc);
 		if (rc < 0)
 		{
 			ERROR("%m: read rc=%d", rc);
@@ -89,6 +90,7 @@ void *modbus(void *v)
 {
 	int s = *(int*)v;
 	int rc;
+	int true = 1;
 	struct modbus_tcp tcp_hdr;
 	struct modbus_req req;
 	struct modbus_rsp rsp;
@@ -100,6 +102,13 @@ void *modbus(void *v)
 	unsigned int quantity;
 
 	VERBOSE("new thread %d\n", s);
+
+	if (setsockopt(s, IPPROTO_TCP, TCP_NODELAY, &true, sizeof(true)) < 0)
+	{
+		ERROR("TCP_NODELAY failed\n");
+		pthread_exit(NULL);
+	}
+	
 	for (;;)
 	{
 		readn(s, &tcp_hdr, sizeof(tcp_hdr));
