@@ -1,4 +1,6 @@
 
+all: modbusd plugin.so gpio.so
+
 modbusd: modbusd.o modbus.o
 	gcc -ldl -pthread modbusd.o modbus.o -o modbusd
 

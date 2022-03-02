@@ -112,7 +112,7 @@ void *modbus(void *v)
 						write_error(s, &tcp_hdr, req.function, ILLEGAL_DATA_VALUE );
 						break;
 					}
-					rc = plugin->read_holding_registers(address, quantity, &arg);
+					rc = plugin->read_holding_registers(s, address, quantity, &arg);
 					if (rc == 0)
 					{
 						rsp.function = req.function;
@@ -147,7 +147,7 @@ void *modbus(void *v)
 						write_error(s, &tcp_hdr, req.function, ILLEGAL_DATA_VALUE );
 						break;
 					}
-					rc = plugin->write_multiple_registers(address, quantity, &req.data);
+					rc = plugin->write_multiple_registers(s, address, quantity, &req.data);
 					if (rc == 0)
 					{
 						write_response(s, &tcp_hdr, &req, 5);

@@ -22,7 +22,7 @@ int init(const char* arg)
 	return 0;
 }
 
-int read_holding_registers(__u16 address, __u16 quantity, struct modbus_arg *data)
+int read_holding_registers(int fd, __u16 address, __u16 quantity, struct modbus_arg *data)
 {
 	int ii;
 
@@ -37,7 +37,7 @@ int read_holding_registers(__u16 address, __u16 quantity, struct modbus_arg *dat
 	return OK;
 }
 
-int write_multiple_registers(__u16 address, __u16 quantity, struct modbus_arg *data)
+int write_multiple_registers(int fd, __u16 address, __u16 quantity, struct modbus_arg *data)
 {
 	int ii;
 

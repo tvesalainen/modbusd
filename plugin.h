@@ -3,6 +3,7 @@
 #define _PLUGIN_H
 
 #include <linux/types.h>
+#include <syslog.h>
 
 #define OK 0
 #define ILLEGAL_FUNCTION 1
@@ -15,6 +16,9 @@
 #define GATEWAY_PATH_UNAVAILABLE 0xa
 #define GATEWAY_TARGET_DEVICE_FAILED_TO_RESPOND 0xb
 
+#define VERBOSE(...) if (verbose) fprintf(stderr, __VA_ARGS__)
+#define ERROR(...)  syslog(LOG_USER|LOG_ERR, __VA_ARGS__)
+
 struct modbus_arg
 {
 	union
@@ -26,7 +30,7 @@ struct modbus_arg
 }__attribute__((packed));
 
 int init(const char* arg);
-int read_holding_registers(__u16 address, __u16 quantity, struct modbus_arg *data);
-int write_multiple_registers(__u16 address, __u16 quantity, struct modbus_arg *data);
+int read_holding_registers(int fd, __u16 address, __u16 quantity, struct modbus_arg *data);
+int write_multiple_registers(int fd, __u16 address, __u16 quantity, struct modbus_arg *data);
  
 #endif /* _PLUGIN_H */
