@@ -43,16 +43,18 @@ struct plugin *plugins[256];
 int add_plugin(const char* arg)
 {
 	int unit;
+	char *parg;
 	char *lib;
 	char *larg;
 	void *plib;
-	int (*init)(const char *arg);
+	int (*init)(const char*);
 
-	unit = atoi(arg);
-	lib = index(arg, ':');
+	parg = strdup(arg);
+	unit = atoi(parg);
+	lib = index(parg, ':');
 	if (lib == NULL)
 	{
-		fprintf(stderr, "illegal unit %s\n", arg);
+		fprintf(stderr, "illegal unit %s\n", parg);
 		exit(-1);
 	}
 	lib++;
