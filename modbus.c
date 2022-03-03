@@ -153,6 +153,7 @@ void *modbus(void *v)
 						}
 						else
 						{
+							ERROR("%m: Read Holding Registers\n");
 							write_error(s, &tcp_hdr, req.function, SLAVE_DEVICE_FAILURE );
 						}
 					}
@@ -185,6 +186,7 @@ void *modbus(void *v)
 						}
 						else
 						{
+							ERROR("%m: Write Multiple Registers\n");
 							write_error(s, &tcp_hdr, req.function, SLAVE_DEVICE_FAILURE );
 						}
 					}

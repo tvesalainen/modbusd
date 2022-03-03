@@ -96,7 +96,7 @@ int read_registers(__u16 address, __u16 quantity, struct modbus_arg *data)
 	{
 		req.lineoffsets[ii] = address + ii;
 	}
-	req.flags = GPIOHANDLE_REQUEST_INPUT;
+	req.flags = GPIOHANDLE_REQUEST_INPUT ;
 	req.lines = quantity;
 	rc = ioctl(fd, GPIO_GET_LINEHANDLE_IOCTL, &req);
 	close(fd);
