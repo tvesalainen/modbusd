@@ -72,7 +72,7 @@ int add_plugin(const char* arg)
 	plib = dlopen(lib, RTLD_LAZY);
 	if (plib == NULL)
 	{
-		fprintf(stderr, "%s not found\n", lib );
+		fprintf(stderr, "couldn't load %s: %s\n", lib, dlerror() );
 		exit(-1);
 	}
 

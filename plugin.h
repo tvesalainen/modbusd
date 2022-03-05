@@ -35,6 +35,8 @@
 #define VERBOSE(...) if (verbose) fprintf(stderr, __VA_ARGS__)
 #define ERROR(...)  syslog(LOG_USER|LOG_ERR, __VA_ARGS__)
 
+extern int verbose;
+
 struct modbus_arg
 {
 	union
