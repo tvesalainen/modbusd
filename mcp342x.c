@@ -25,16 +25,19 @@
 #include <stdlib.h>
 #include <fcntl.h>
 #include <linux/i2c-dev.h>
+#include <i2c/smbus.h>
 
 #include "plugin.h"
 
 /*
 	Address
+	9-9	ADC Pi
 	8-7	PGA Gain
 	6-5	Sample Rate
 	4-2	Device Address
 	1-0	Channel
 */
+#define ADC(x) ((x>>9)&0x1)
 #define PGA(x) ((x>>7)&0x3)
 #define RATE(x) ((x>>5)&0x3)
 #define ADDR(x) ((x>>2)&0x7)
@@ -42,6 +45,52 @@
 #define ADDRESS(a) (0xd<<3|a)
 #define REGISTER(rdy, c, oc, s, g) (rdy<<7|c<<5|oc<<4|s<<2|g)
 
+struct data
+{
+	union
+	{
+		struct 
+		{
+			__s32 pad:4;
+			__s32 value:12;
+			__s32 ready:1;
+			__s32 channel:2;
+			__s32 mode:1;
+			__s32 rate:2;
+			__s32 pga:2;
+		} bits_12;
+		struct 
+		{
+			__s32 pad:2;
+			__s32 value:14;
+			__s32 ready:1;
+			__s32 channel:2;
+			__s32 mode:1;
+			__s32 rate:2;
+			__s32 pga:2;
+		} bits_14;
+		struct 
+		{
+			__s32 value:16;
+			__s32 ready:1;
+			__s32 channel:2;
+			__s32 mode:1;
+			__s32 rate:2;
+			__s32 pga:2;
+		} bits_16;
+		struct 
+		{
+			__s32 pad:6;
+			__s32 value:18;
+			__s32 ready:1;
+			__s32 channel:2;
+			__s32 mode:1;
+			__s32 rate:2;
+			__s32 pga:2;
+		} bits_18;
+	};
+};
+useconds_t SLEEP[] = {41667, 16667, 66667, 266667};
 struct modbusd_ctx *ctx;
 char dev[PATH_MAX];
 
@@ -72,8 +121,11 @@ int read_holding_registers(int sock, __u16 address, __u16 quantity, struct modbu
 	__u8 addr = ADDRESS(ADDR(address));
 	__u8 reg = REGISTER(1, CHANNEL(address), 0, RATE(address), PGA(address));
 	int fd;
+	int rc;
+	struct data dat;
 
-	VERBOSE("pga=%d rate=%d addr=%d ch=%d\n",
+	VERBOSE("adc=%d pga=%d rate=%d addr=%d ch=%d\n",
+		ADC(address),
 		PGA(address),
 		RATE(address),
 		ADDR(address),
@@ -86,4 +138,27 @@ int read_holding_registers(int sock, __u16 address, __u16 quantity, struct modbu
 		ERROR("open %s failed\n", dev);
 		return -1;
 	}
+	if  (ioctl(fd, I2C_SLAVE, addr) < 0)
+	{
+		ERROR("I2C_SLAVE %s failed\n", dev);
+		return -1;
+	}
+	if (i2c_smbus_write_byte(fd, reg) < 0)
+	{
+		ERROR("i2c_smbus_write_byte_data %s failed\n", dev);
+		return -1;
+	}
+	if (usleep(SLEEP[RATE(address)]) < 0)
+	{
+		ERROR("usleep %s failed\n", dev);
+		return -1;
+	}
+	rc = read(fd, &dat, sizeof(dat));
+	if (rc < 0)
+	{
+		ERROR("read %s failed\n", dev);
+		return -1;
+	}
+
+	VERBOSE("%d %x\n", dat.bits_12.value, dat.bits_12.ready);
 }
