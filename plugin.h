@@ -32,10 +32,12 @@
 #define GATEWAY_PATH_UNAVAILABLE 0xa
 #define GATEWAY_TARGET_DEVICE_FAILED_TO_RESPOND 0xb
 
-#define VERBOSE(...) if (verbose) fprintf(stderr, __VA_ARGS__)
 #define ERROR(...)  syslog(LOG_USER|LOG_ERR, __VA_ARGS__)
 
-extern int verbose;
+struct modbusd_ctx
+{
+	int verbose;
+};
 
 struct modbus_arg
 {
@@ -47,7 +49,7 @@ struct modbus_arg
 	};
 }__attribute__((packed));
 
-int init(const char* arg);
+int init(struct modbusd_ctx *ctx, const char* arg);
 int read_holding_registers(int fd, __u16 address, __u16 quantity, struct modbus_arg *data);
 int write_multiple_registers(int fd, __u16 address, __u16 quantity, struct modbus_arg *data);
  

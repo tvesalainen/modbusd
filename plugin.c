@@ -25,7 +25,7 @@
 int size;
 __u16 *memory;
 
-int init(const char* arg)
+int init(struct modbusd_ctx *ctx, const char* arg)
 {
 	fprintf(stderr, "init arg %s\n", arg);
 	size = atoi(arg);

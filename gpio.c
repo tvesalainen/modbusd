@@ -35,7 +35,7 @@ const char *dev;
 int read_registers(__u16 address, __u16 quantity, struct modbus_arg *data);
 int poll_register(int fd, __u16 address, struct modbus_arg *data);
 
-int init(const char* arg)
+int init(struct modbusd_ctx *ctx, const char* arg)
 {
 	int fd;
 

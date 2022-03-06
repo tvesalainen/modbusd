@@ -35,7 +35,7 @@
 #include "modbus.h"
 #include "modbusd.h"
 
-int verbose = 0;
+struct modbusd_ctx ctx;
 int use_stderr = 1;
 
 struct plugin *plugins[256];
@@ -47,7 +47,7 @@ int add_plugin(const char* arg)
 	char *lib;
 	char *larg;
 	void *plib;
-	int (*init)(const char*);
+	int (*init)(struct modbusd_ctx*, const char*);
 
 	parg = strdup(arg);
 	unit = atoi(parg);
@@ -83,7 +83,7 @@ int add_plugin(const char* arg)
 	init = dlsym(plib, "init");
 	if (init != NULL)
 	{
-		init(larg);
+		init(&ctx, larg);
 	}
 }
 
@@ -105,7 +105,7 @@ int main(int argc, char **argv)
                 switch (c)
                 {
                         case 'v':
-                                verbose = 1;
+                                ctx.verbose = 1;
                         break;
                         case 's':
                                 use_stderr = 0;

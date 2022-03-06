@@ -42,14 +42,18 @@
 #define ADDRESS(a) (0xd<<3|a)
 #define REGISTER(rdy, c, oc, s, g) (rdy<<7|c<<5|oc<<4|s<<2|g)
 
+struct modbusd_ctx *ctx;
 char dev[PATH_MAX];
 
-int init(const char* arg)
+#define VERBOSE(...) if (ctx->verbose) fprintf(stderr, __VA_ARGS__)
+
+int init(struct modbusd_ctx *mctx, const char* arg)
 {
 	int adapter;
 	int fd;
 
 	fprintf(stderr, "init arg %s\n", arg);
+	ctx = mctx;
 	adapter = atoi(arg);
 	snprintf(dev, sizeof(dev), "/dev/i2c-%d", adapter);
 

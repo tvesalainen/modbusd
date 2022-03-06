@@ -18,9 +18,13 @@
 #ifndef _MODBUSD_H
 #define _MODBUSD_H
 
+#include "plugin.h"
+
 #define MODBUS_PORT 502
 
-extern int verbose;
+extern struct modbusd_ctx ctx;
+
+#define VERBOSE(...) if (ctx.verbose) fprintf(stderr, __VA_ARGS__)
 
 struct plugin
 {
