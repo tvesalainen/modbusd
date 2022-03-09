@@ -44,8 +44,8 @@ struct modbus_arg
 	union
 	{
 		__u8 array_byte[250];
-		__u16 array_short[125];	/* in network byte order - use htons and ntohs */
-		__u32 array_int[62];	/* in network byte order - use htonl and ntohl */
+		__s16 array_short[125];	/* in network byte order - use htons and ntohs */
+		__s32 array_int[62];	/* in network byte order - use htonl and ntohl */
 	};
 }__attribute__((packed));
 
