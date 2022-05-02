@@ -1,0 +1,13 @@
+[Unit]
+Description=Simple modbus tcp implementation
+After=network.target
+
+[Service]
+Type=simple
+Environment=DAEMON=/usr/bin/modbusd
+Environment=PLUGINS=-l 0:/usr/lib/gpio.so:/dev/gpiochip0
+ExecStart=/usr/bin/modbusd -s $PLUGINS
+
+[Install]
+WantedBy=multi-user.target
+
